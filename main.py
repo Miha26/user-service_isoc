@@ -6,7 +6,7 @@ from bson import ObjectId
 app = FastAPI()
 
 # Conectare la MongoDB (port default 27017)
-client = MongoClient("mongodb://mongo-users:27017/")
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client["user_db"]
 users_collection = db["users"]
 
