@@ -1,27 +1,24 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from pymongo import MongoClient
+from pydantic import BaseModel
 from bson import ObjectId
 import os
 
 app = FastAPI()
 
-# Preluare URI din variabilele de mediu
+# 🟢 Conectare la MongoDB Atlas folosind variabila de mediu
 mongo_uri = os.getenv("MONGO_URI")
 if not mongo_uri:
-    raise Exception("MONGO_URI environment variable not set")
+    raise RuntimeError("MONGO_URI is not set in environment variables!")
 
-# Conectare la MongoDB Atlas
 client = MongoClient(mongo_uri)
 db = client["user_db"]
 users_collection = db["users"]
 
-# Modelul User
 class User(BaseModel):
     username: str
     password: str
 
-# Înregistrare
 @app.post("/register")
 def register(user: User):
     if users_collection.find_one({"username": user.username}):
@@ -29,7 +26,6 @@ def register(user: User):
     users_collection.insert_one(user.dict())
     return {"message": "User registered"}
 
-# Autentificare
 @app.post("/login")
 def login(user: User):
     found = users_collection.find_one({
